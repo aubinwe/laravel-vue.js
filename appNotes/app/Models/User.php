@@ -23,7 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id',
     ];
 
     /**
@@ -49,5 +49,33 @@ class User extends Authenticatable
         ];
     }
 
-    public function subjects(): BelongsToMany { return $this->belongsToMany(Subject::class); }
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class);
+    }
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'professor_id');
+    }
+
+    public function isEtudiant()
+    {
+        return $this->role->name === 'etudiant';
+    }
+
+    public function isProfesseur()
+    {
+        return $this->role->name === 'professeur';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role->name === 'administration';
+    }
 }

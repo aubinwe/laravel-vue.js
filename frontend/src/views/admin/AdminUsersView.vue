@@ -13,7 +13,7 @@
           <option value="user">Étudiant</option>
         </select>
         <input v-model="filters.q" placeholder="Recherche nom/email" class="rounded-md border px-3 py-2 text-sm" />
-        <button @click="load" class="rounded-md border px-3 py-2 text-sm hover:bg-slate-50">Filtrer</button>
+        <button @click="onFilter" class="rounded-md border px-3 py-2 text-sm hover:bg-slate-50">Filtrer</button>
       </div>
     </div>
 
@@ -34,7 +34,7 @@
 
     <div class="rounded-xl border bg-white overflow-hidden">
       <div class="px-4 py-3 border-b font-medium">Liste des utilisateurs</div>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto" v-if="users.length">
         <table class="min-w-full divide-y divide-slate-200">
           <thead class="bg-slate-50">
             <tr>
@@ -52,13 +52,16 @@
           </tbody>
         </table>
       </div>
-      <div class="px-4 py-2 text-sm text-slate-500" v-if="meta">Page {{ meta.current_page }} / {{ meta.last_page }}</div>
+      <EmptyState v-else>Pas d'utilisateurs trouvés.</EmptyState>
+      <PaginationBar v-if="meta" :meta="meta" @change="goto" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../../lib/api';
+import PaginationBar from '../../components/PaginationBar.vue';
+import EmptyState from '../../components/EmptyState.vue';
 
 const users = ref<any[]>([]);
 const meta = ref<any>(null);
@@ -66,8 +69,11 @@ const saving = ref(false);
 const filters = ref({ role: '', q: '' });
 const form = ref({ name: '', email: '', password: '', role: 'user' });
 
-const load = async () => {
-  const params: any = {};
+const page = ref(1);
+
+const load = async (p?:number) => {
+  if (typeof p === 'number') page.value = p;
+  const params: any = { page: page.value };
   if (filters.value.role) params.role = filters.value.role;
   if (filters.value.q) params.q = filters.value.q;
   const r = await api.get('/admin/users', { params });
@@ -76,7 +82,9 @@ const load = async () => {
 };
 
 const createUser = async () => {
-  if (!form.value.name || !form.value.email || !form.value.password) return;
+  if (!form.value.name.trim()) return alert('Nom requis');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.value.email)) return alert('Email invalide');
+  if (!form.value.password || form.value.password.length < 6) return alert('Mot de passe trop court');
   saving.value = true;
   try {
     await api.post('/admin/users', form.value);
@@ -84,6 +92,9 @@ const createUser = async () => {
     await load();
   } finally { saving.value = false; }
 };
+
+const goto = async (p:number) => { if (p<1) return; await load(p); };
+const onFilter = async () => { await load(1); };
 
 onMounted(load);
 </script>

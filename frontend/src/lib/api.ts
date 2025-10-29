@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
+import { useUiStore } from '../stores/ui';
 
 const baseURL = import.meta.env.VITE_API_URL || '/api/v1';
 const api = axios.create({ baseURL });
@@ -15,6 +16,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (r) => r,
   (e) => {
+    try {
+      const ui = useUiStore();
+      const msg = e.response?.data?.message || e.message || 'Erreur serveur';
+      ui.error(msg);
+    } catch (_) {}
     if (e.response?.status === 401) {
       try {
         const auth = useAuthStore();
