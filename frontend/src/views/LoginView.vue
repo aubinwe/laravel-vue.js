@@ -58,6 +58,8 @@
         <div class="mt-6 text-center text-sm text-gray-500">
           <p>Comptes de test :</p>
           <p class="mt-1">Admin: admin@gestion-notes.com / password</p>
+          <p class="mt-1">Professeur: prof@test.com / password</p>
+          <p class="mt-1">Étudiant: etudiant@test.com / password</p>
         </div>
       </div>
     </div>

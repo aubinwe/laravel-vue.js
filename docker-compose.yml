@@ -1,0 +1,38 @@
+# docker-compose.yml simplifié
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0           # Utilise l'image officielle
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gestion_notes
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build: ./appNotes
+    container_name: laravel_app
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_DATABASE=gestion_notes
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    ports:
+      - "9000:9000"
+
+  frontend:
+    build: ./frontend
+    container_name: vue_app
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  db_data:

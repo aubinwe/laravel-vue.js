@@ -1,0 +1,35 @@
+# Laravel
+appNotes/vendor/
+appNotes/node_modules/
+appNotes/.env
+appNotes/storage/logs/*.log
+appNotes/storage/framework/cache/*
+appNotes/storage/framework/sessions/*
+appNotes/storage/framework/views/*
+appNotes/bootstrap/cache/*
+
+# Vue.js
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test_api.html
+check_users.php

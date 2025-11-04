@@ -41,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/deliberation/deliberate', [\App\Http\Controllers\DeliberationController::class, 'deliberateGrades']);
     
     // 👤 Profil utilisateur
-    Route::get('/profile', function(Request $request) {
+    Route::get('/profile', function(\Illuminate\Http\Request $request) {
         $user = $request->user()->load('role');
         if ($user->isEtudiant()) {
             $user->load('student');
