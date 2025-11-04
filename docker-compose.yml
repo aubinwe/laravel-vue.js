@@ -1,38 +1,70 @@
-# docker-compose.yml simplifié
-version: "3.8"
-
+# docker-compose.yml
 services:
-  db:
-    image: mysql:8.0           # Utilise l'image officielle
-    container_name: mysql_db
+  mysql:
+    image: mysql:8.0
+    container_name: gestion-notes-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: gestion_notes
+      MYSQL_USER: notes_user
+      MYSQL_PASSWORD: notes_password
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   backend:
-    build: ./appNotes
-    container_name: laravel_app
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db
-      - DB_DATABASE=gestion_notes
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
+    build:
+      context: ./appNotes
+      dockerfile: Dockerfile
+    container_name: gestion-notes-backend
     ports:
-      - "9000:9000"
+      - "8000:8000"
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: gestion_notes
+      DB_USERNAME: notes_user
+      DB_PASSWORD: notes_password
+      APP_ENV: local
+      APP_DEBUG: "true"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./appNotes:/var/www/html
+    networks:
+      - app-network
+    command: >
+      sh -c "
+        composer install &&
+        php artisan key:generate --force &&
+        php artisan migrate --force &&
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
 
   frontend:
-    build: ./frontend
-    container_name: vue_app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gestion-notes-frontend
+    ports:
+      - "8080:80"
     depends_on:
       - backend
-    ports:
-      - "5173:5173"
+    networks:
+      - app-network
 
 volumes:
-  db_data:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge

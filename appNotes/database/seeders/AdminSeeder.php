@@ -3,140 +3,86 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Role;
+use App\Models\Student;
+use App\Models\Course;
+use App\Models\Grade;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 
 class AdminSeeder extends Seeder
 {
     public function run()
     {
-        try {
-            // Vider les tables d'abord
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            DB::table('grades')->truncate();
-            DB::table('students')->truncate();
-            DB::table('courses')->truncate();
-            DB::table('users')->truncate();
-            DB::table('roles')->truncate();
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-            
-            // Créer les rôles
-            DB::table('roles')->insert([
-                ['id' => 1, 'name' => 'etudiant', 'created_at' => now()],
-                ['id' => 2, 'name' => 'professeur', 'created_at' => now()],
-                ['id' => 3, 'name' => 'administration', 'created_at' => now()],
-            ]);
-
-            // Créer l'utilisateur admin
-            DB::table('users')->insert([
-                'id' => 1,
+        // Créer les rôles
+        $roles = [
+            ['name' => 'etudiant'],
+            ['name' => 'professeur'],
+            ['name' => 'administration'],
+        ];
+        
+        foreach ($roles as $role) {
+            Role::firstOrCreate($role);
+        }
+        
+        // Récupérer les rôles
+        $adminRole = Role::where('name', 'administration')->first();
+        $profRole = Role::where('name', 'professeur')->first();
+        $studentRole = Role::where('name', 'etudiant')->first();
+        
+        // Créer l'admin
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@gestion-notes.com'],
+            [
                 'name' => 'Admin',
-                'email' => 'admin@gestion-notes.com',
                 'password' => Hash::make('password'),
-                'role_id' => 3,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Créer un professeur de test
-            DB::table('users')->insert([
-                'id' => 2,
+                'role_id' => $adminRole->id,
+            ]
+        );
+        
+        // Créer le professeur
+        $prof = User::firstOrCreate(
+            ['email' => 'prof@test.com'],
+            [
                 'name' => 'Professeur Test',
-                'email' => 'prof@test.com',
                 'password' => Hash::make('password'),
-                'role_id' => 2,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Créer un étudiant de test
-            DB::table('users')->insert([
-                'id' => 3,
+                'role_id' => $profRole->id,
+            ]
+        );
+        
+        // Créer l'étudiant
+        $etudiant = User::firstOrCreate(
+            ['email' => 'etudiant@test.com'],
+            [
                 'name' => 'Étudiant Test',
-                'email' => 'etudiant@test.com',
                 'password' => Hash::make('password'),
-                'role_id' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Créer le profil étudiant
-            DB::table('students')->insert([
-                'id' => 1,
-                'user_id' => 3,
+                'role_id' => $studentRole->id,
+            ]
+        );
+        
+        // Créer le profil étudiant
+        Student::firstOrCreate(
+            ['user_id' => $etudiant->id],
+            [
                 'matricule' => 'ETU20240001',
                 'filiere' => 'Informatique',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Créer des cours de test
-            DB::table('courses')->insert([
-                [
-                    'id' => 1,
-                    'name' => 'Mathématiques',
-                    'code' => 'MATH101',
-                    'coefficient' => 3,
-                    'professor_id' => 2,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Physique',
-                    'code' => 'PHYS101',
-                    'coefficient' => 2,
-                    'professor_id' => 2,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Informatique',
-                    'code' => 'INFO101',
-                    'coefficient' => 4,
-                    'professor_id' => 2,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            ]);
-            
-            // Créer des notes de test
-            DB::table('grades')->insert([
-                [
-                    'student_id' => 1,
-                    'course_id' => 1,
-                    'note' => 15.50,
-                    'semestre' => 'S1 2024',
-                    'statut' => 'en_cours',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                [
-                    'student_id' => 1,
-                    'course_id' => 2,
-                    'note' => 12.00,
-                    'semestre' => 'S1 2024',
-                    'statut' => 'en_cours',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                [
-                    'student_id' => 1,
-                    'course_id' => 3,
-                    'note' => 17.25,
-                    'semestre' => 'S1 2024',
-                    'statut' => 'en_cours',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-            ]);
-            
-            echo "Seeder exécuté avec succès !\n";
-            
-        } catch (\Exception $e) {
-            echo "Erreur dans le seeder: " . $e->getMessage() . "\n";
-            throw $e;
+            ]
+        );
+        
+        // Créer des cours
+        $courses = [
+            ['name' => 'Mathématiques', 'code' => 'MATH101', 'coefficient' => 3, 'professor_id' => $prof->id],
+            ['name' => 'Physique', 'code' => 'PHYS101', 'coefficient' => 2, 'professor_id' => $prof->id],
+            ['name' => 'Informatique', 'code' => 'INFO101', 'coefficient' => 4, 'professor_id' => $prof->id],
+        ];
+        
+        foreach ($courses as $courseData) {
+            Course::firstOrCreate(['code' => $courseData['code']], $courseData);
         }
+        
+        echo "Utilisateurs créés avec succès !\n";
+        echo "Admin: admin@gestion-notes.com / password\n";
+        echo "Professeur: prof@test.com / password\n";
+        echo "Étudiant: etudiant@test.com / password\n";
     }
 }
