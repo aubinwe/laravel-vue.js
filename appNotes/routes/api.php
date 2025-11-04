@@ -8,6 +8,15 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\BulletinController;
 
+// 🏥 Route de santé
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'OK',
+        'timestamp' => now(),
+        'database' => 'connected'
+    ]);
+});
+
 // 🔐 Routes d'authentification
 Route::post('/login', [AuthController::class, 'login']);
 

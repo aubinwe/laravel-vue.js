@@ -4,31 +4,41 @@ echo   DEMARRAGE GESTION NOTES
 echo ========================================
 
 echo.
-echo 1. Demarrage du serveur Laravel (Backend)...
-cd /d "%~dp0appNotes"
-start "Laravel Backend" cmd /k "php artisan serve --host=localhost --port=8000"
+echo INSTRUCTIONS:
+echo 1. Ce script va ouvrir 2 fenetres separees
+echo 2. Une pour le Backend (Laravel)
+echo 3. Une pour le Frontend (Vue.js)
+echo 4. NE FERMEZ PAS ces fenetres pendant l'utilisation
+echo.
+echo Appuyez sur une touche pour continuer...
+pause >nul
 
 echo.
-echo 2. Attente de 3 secondes...
-timeout /t 3 /nobreak >nul
+echo Demarrage du Backend Laravel...
+start "Backend Laravel - NE PAS FERMER" cmd /k "cd /d \"%~dp0\" && start-backend.bat"
+
+echo Attente de 3 secondes...
+ping 127.0.0.1 -n 4 >nul
 
 echo.
-echo 3. Demarrage du serveur Vue.js (Frontend)...
-cd /d "%~dp0frontend"
-start "Vue Frontend" cmd /k "npm run dev"
+echo Demarrage du Frontend Vue.js...
+start "Frontend Vue.js - NE PAS FERMER" cmd /k "cd /d \"%~dp0\" && start-frontend.bat"
 
 echo.
 echo ========================================
-echo   SERVEURS DEMARRES !
+echo   SERVEURS EN COURS DE DEMARRAGE
 echo ========================================
 echo.
-echo Backend:  http://localhost:8000
-echo Frontend: http://localhost:5173
+echo URLs d'acces:
+echo - Backend API: http://localhost:8000
+echo - Application: http://localhost:5173
 echo.
 echo Comptes de test:
-echo - Admin:     admin@gestion-notes.com / password
+echo - Admin:      admin@gestion-notes.com / password
 echo - Professeur: prof@test.com / password  
 echo - Etudiant:   etudiant@test.com / password
+echo.
+echo IMPORTANT: Gardez les 2 fenetres ouvertes !
 echo.
 echo Appuyez sur une touche pour fermer cette fenetre...
 pause >nul
