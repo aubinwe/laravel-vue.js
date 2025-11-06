@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Connection</title>
+</head>
+<body>
+    <h1>Test de Connexion API</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        // Test 1: Connexion de base
+        fetch('http://localhost:8000/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: 'admin@gestion-notes.com',
+                password: 'password'
+            })
+        })
+        .then(response => {
+            results.innerHTML += `<p>Status: ${response.status}</p>`;
+            return response.json();
+        })
+        .then(data => {
+            results.innerHTML += `<p>Response: ${JSON.stringify(data)}</p>`;
+            if (data.token) {
+                results.innerHTML += `<p style="color: green;">✅ Connexion réussie!</p>`;
+                
+                // Test 2: Appel authentifié
+                return fetch('http://localhost:8000/api/me', {
+                    headers: {
+                        'Authorization': `Bearer ${data.token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+            }
+        })
+        .then(response => {
+            if (response) {
+                results.innerHTML += `<p>Me Status: ${response.status}</p>`;
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data) {
+                results.innerHTML += `<p>User: ${JSON.stringify(data)}</p>`;
+                results.innerHTML += `<p style="color: green;">✅ API authentifiée fonctionne!</p>`;
+            }
+        })
+        .catch(error => {
+            results.innerHTML += `<p style="color: red;">❌ Erreur: ${error.message}</p>`;
+            console.error('Erreur:', error);
+        });
+    </script>
+</body>
+</html>
