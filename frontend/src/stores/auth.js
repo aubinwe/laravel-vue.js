@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import api from '../lib/axios'
+import api from '../lib/api'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
-    token: localStorage.getItem('auth_token'),
-    isAuthenticated: false
+    token: localStorage.getItem('token'),
+    isAuthenticated: !!localStorage.getItem('token')
   }),
 
   getters: {
@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = token
         this.isAuthenticated = true
         
-        localStorage.setItem('auth_token', token)
+        localStorage.setItem('token', token)
         
         return { success: true }
       } catch (error) {
@@ -44,17 +44,29 @@ export const useAuthStore = defineStore('auth', {
         this.user = null
         this.token = null
         this.isAuthenticated = false
-        localStorage.removeItem('auth_token')
+        localStorage.removeItem('token')
       }
     },
 
     async fetchUser() {
+      if (!this.token) {
+        this.isAuthenticated = false
+        return
+      }
+      
       try {
         const response = await api.get('/me')
         this.user = response.data
         this.isAuthenticated = true
       } catch (error) {
+        console.error('Erreur fetchUser:', error)
         this.logout()
+      }
+    },
+
+    async initAuth() {
+      if (this.token) {
+        await this.fetchUser()
       }
     }
   }

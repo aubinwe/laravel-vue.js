@@ -1,32 +1,41 @@
 @echo off
-echo Deploiement de l'application Gestion Notes sur Kubernetes...
+echo ========================================
+echo   DEPLOIEMENT KUBERNETES
+echo ========================================
 
-echo 1. Application des secrets et configmaps...
-kubectl apply -f secret.yaml
-kubectl apply -f configmap.yaml
+echo.
+echo 1. Construction des images Docker...
+cd /d "%~dp0.."
+docker build -t gestion-notes/backend:latest ./appNotes
+docker build -t gestion-notes/frontend:latest ./frontend
 
-echo 2. Deploiement de MySQL...
-kubectl apply -f mysql-deployment.yaml
-kubectl apply -f mysql-service.yaml
+echo.
+echo 2. Application des manifests Kubernetes...
+kubectl apply -f k8s/01-namespace.yaml
+kubectl apply -f k8s/02-configmap.yaml
+kubectl apply -f k8s/03-secrets.yaml
+kubectl apply -f k8s/04-mysql.yaml
+kubectl apply -f k8s/05-backend.yaml
+kubectl apply -f k8s/06-frontend.yaml
+kubectl apply -f k8s/07-ingress.yaml
 
-echo 3. Attente du demarrage de MySQL...
-timeout /t 30
+echo.
+echo 3. Attente du demarrage des pods...
+kubectl wait --for=condition=ready pod -l app=mysql -n gestion-notes --timeout=300s
+kubectl wait --for=condition=ready pod -l app=backend -n gestion-notes --timeout=300s
+kubectl wait --for=condition=ready pod -l app=frontend -n gestion-notes --timeout=300s
 
-echo 4. Deploiement du backend...
-kubectl apply -f backend-deployment.yaml
-kubectl apply -f backend-service.yaml
+echo.
+echo 4. Verification du statut...
+kubectl get pods -n gestion-notes
+kubectl get services -n gestion-notes
+kubectl get ingress -n gestion-notes
 
-echo 5. Deploiement du frontend...
-kubectl apply -f frontend-deployment.yaml
-kubectl apply -f frontend-service.yaml
+echo.
+echo 5. Configuration de l'acces local...
+echo Ajoutez cette ligne a votre fichier hosts:
+echo 127.0.0.1 gestion-notes.local
 
-echo 6. Configuration de l'ingress...
-kubectl apply -f ingress.yaml
-
-echo 7. Verification du statut...
-kubectl get pods
-kubectl get services
-kubectl get ingress
-
-echo Deploiement termine!
-echo Acces: http://localhost ou http://votre-ip-cluster
+echo.
+echo Application accessible sur: http://gestion-notes.local
+pause

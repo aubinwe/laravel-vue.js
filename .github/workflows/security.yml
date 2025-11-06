@@ -1,0 +1,80 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Tous les lundis à 2h
+
+jobs:
+  # Scan de sécurité du code
+  code-security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Scan des dépendances
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+
+    - name: Check PHP dependencies
+      working-directory: ./appNotes
+      run: |
+        composer audit
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Check Node.js dependencies
+      working-directory: ./frontend
+      run: |
+        npm audit --audit-level=high
+
+  # Scan des images Docker
+  docker-security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build Backend image
+      run: docker build -t backend-test ./appNotes
+
+    - name: Scan Backend image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'backend-test'
+        format: 'table'
+
+    - name: Build Frontend image
+      run: docker build -t frontend-test ./frontend
+
+    - name: Scan Frontend image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'frontend-test'
+        format: 'table'

@@ -11,11 +11,16 @@ class ClaimController extends Controller
     {
         $user = $request->user();
         
-        if ($user->isAdmin()) {
-            $claims = Claim::with(['grade.student.user', 'grade.course', 'creator'])->get();
+        if ($user->isAdmin() || $user->isProfesseur()) {
+            $claims = Claim::with(['student.user', 'course'])->get();
         } else {
-            $claims = Claim::with(['grade.student.user', 'grade.course'])
-                ->where('created_by', $user->id)
+            // Étudiant voit ses réclamations
+            $student = $user->student;
+            if (!$student) {
+                return response()->json([]);
+            }
+            $claims = Claim::with(['course'])
+                ->where('student_id', $student->id)
                 ->get();
         }
 
@@ -25,17 +30,27 @@ class ClaimController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'grade_id' => 'required|exists:grades,id',
-            'commentaire' => 'required|string'
+            'course_id' => 'required|exists:courses,id',
+            'motif' => 'required|string',
+            'description' => 'required|string'
         ]);
+
+        $user = $request->user();
+        $student = $user->student;
+        
+        if (!$student) {
+            return response()->json(['error' => 'Profil étudiant non trouvé'], 400);
+        }
 
         $claim = Claim::create([
-            'grade_id' => $request->grade_id,
-            'commentaire' => $request->commentaire,
-            'created_by' => $request->user()->id
+            'student_id' => $student->id,
+            'course_id' => $request->course_id,
+            'motif' => $request->motif,
+            'description' => $request->description,
+            'statut' => 'en_attente'
         ]);
 
-        return response()->json($claim->load(['grade.student.user', 'grade.course']), 201);
+        return response()->json($claim->load(['student.user', 'course']), 201);
     }
 
     public function update(Request $request, Claim $claim)
@@ -46,6 +61,6 @@ class ClaimController extends Controller
 
         $claim->update(['statut' => $request->statut]);
         
-        return response()->json($claim->load(['grade.student.user', 'grade.course']));
+        return response()->json($claim->load(['student.user', 'course']));
     }
 }

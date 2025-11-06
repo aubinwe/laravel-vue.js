@@ -1,21 +1,43 @@
 @echo off
-echo === CORRECTION MYSQL ===
+echo === CORRECTION CONNEXION MYSQL ===
 
-echo 1. Arret des conteneurs Docker...
-docker stop $(docker ps -q) 2>nul
+echo 1. Demarrage XAMPP MySQL...
+cd /d C:\xampp
+start xampp-control.exe
 
-echo 2. Verification XAMPP MySQL...
-net start | findstr MySQL >nul && echo "MySQL XAMPP: Running" || echo "MySQL XAMPP: Stopped - Demarrer XAMPP"
+echo 2. Attente 5 secondes...
+timeout /t 5 /nobreak >nul
 
-echo 3. Test de connexion...
-mysql -u root -p -e "SHOW DATABASES;" 2>nul && echo "Connexion: OK" || echo "Connexion: KO"
+echo 3. Verification de la base de donnees...
+cd /d C:\xampp\htdocs\gestionNote\appNotes
 
-echo 4. Creation de la base si necessaire...
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS gestion_notes;"
+echo 4. Configuration .env...
+echo DB_CONNECTION=mysql > .env.temp
+echo DB_HOST=127.0.0.1 >> .env.temp
+echo DB_PORT=3306 >> .env.temp
+echo DB_DATABASE=gestion_notes >> .env.temp
+echo DB_USERNAME=root >> .env.temp
+echo DB_PASSWORD= >> .env.temp
+echo APP_NAME="Gestion Notes" >> .env.temp
+echo APP_ENV=local >> .env.temp
+echo APP_KEY=base64:YourGeneratedKeyHere >> .env.temp
+echo APP_DEBUG=true >> .env.temp
+echo APP_URL=http://localhost:8000 >> .env.temp
+echo SANCTUM_STATEFUL_DOMAINS=localhost:5173 >> .env.temp
+echo SESSION_DRIVER=database >> .env.temp
+echo CACHE_DRIVER=file >> .env.temp
 
-echo 5. Reset des utilisateurs avec Artisan...
-cd appNotes
-php artisan config:clear
+copy .env.temp .env
+del .env.temp
+
+echo 5. Generation cle application...
+php artisan key:generate
+
+echo 6. Creation base de donnees...
 php artisan migrate:fresh --seed
 
+echo 7. Demarrage serveur...
+start cmd /k "php artisan serve"
+
+echo === MYSQL CORRIGE ===
 pause

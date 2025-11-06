@@ -10,10 +10,11 @@ return new class extends Migration
     {
         Schema::create('claims', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('grade_id')->constrained()->onDelete('cascade');
-            $table->text('commentaire');
+            $table->foreignId('student_id')->constrained()->onDelete('cascade');
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->string('motif');
+            $table->text('description');
             $table->enum('statut', ['en_attente', 'approuve', 'rejete'])->default('en_attente');
-            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
         });
     }

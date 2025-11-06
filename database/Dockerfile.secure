@@ -1,0 +1,9 @@
+FROM mysql:8.0
+
+ENV MYSQL_DATABASE=gestion_notes
+ENV MYSQL_ALLOW_EMPTY_PASSWORD=yes
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
+    CMD mysqladmin ping -h localhost || exit 1
+
+EXPOSE 3306

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gestion-notes
+  labels:
+    app: gestion-notes
+    environment: production

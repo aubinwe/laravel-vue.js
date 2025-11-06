@@ -1,0 +1,31 @@
+FROM php:8.2-apache
+
+RUN apt-get update && apt-get install -y \
+    libpng-dev libxml2-dev libzip-dev default-mysql-client \
+    && docker-php-ext-install pdo_mysql gd zip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+COPY . .
+
+RUN composer install --no-dev --optimize-autoloader
+
+# Configuration DB directe dans le container
+RUN echo "DB_CONNECTION=mysql" > .env && \
+    echo "DB_HOST=mysql" >> .env && \
+    echo "DB_PORT=3306" >> .env && \
+    echo "DB_DATABASE=gestion_notes" >> .env && \
+    echo "DB_USERNAME=root" >> .env && \
+    echo "DB_PASSWORD=root" >> .env && \
+    echo "APP_KEY=base64:A1fafHVJb3rrnHwJ9T5nCJoyIoNSRpHFcW7N+Ko9PXw=" >> .env
+
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 storage bootstrap/cache
+
+RUN a2enmod rewrite headers
+COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
+
+EXPOSE 80
+CMD ["apache2-foreground"]

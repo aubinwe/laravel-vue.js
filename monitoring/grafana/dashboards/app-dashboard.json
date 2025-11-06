@@ -1,0 +1,48 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Gestion Notes Metrics",
+    "time": {
+      "from": "now-5m",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Nombre d'utilisateurs",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "users_total",
+            "legendFormat": "Total Users"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Nombre de notes",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "notes_total",
+            "legendFormat": "Total Notes"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Requêtes API par minute",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[1m]) * 60",
+            "legendFormat": "{{method}} {{uri}}"
+          }
+        ]
+      }
+    ]
+  }
+}

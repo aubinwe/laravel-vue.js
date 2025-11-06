@@ -1,0 +1,41 @@
+services:
+  # Backend Laravel (utilise la DB XAMPP)
+  backend:
+    build:
+      context: ./appNotes
+      dockerfile: Dockerfile
+    container_name: gestion-notes-backend
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=mysql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=gestion_notes
+      - DB_USERNAME=root
+      - DB_PASSWORD=
+    ports:
+      - "8000:8000"
+    networks:
+      - gestion-notes-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Frontend Vue.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gestion-notes-frontend
+    environment:
+      - VITE_API_URL=http://backend:8000/api
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - gestion-notes-network
+
+networks:
+  gestion-notes-network:
+    driver: bridge

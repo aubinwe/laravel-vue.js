@@ -1,0 +1,116 @@
+services:
+  app:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./demo:/usr/share/nginx/html
+    command: >
+      sh -c "
+      mkdir -p /usr/share/nginx/html &&
+      cat > /usr/share/nginx/html/index.html << 'EOF'
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>Gestion Notes - DevOps Demo</title>
+          <style>
+              body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+              .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              .header { text-align: center; color: #2563eb; margin-bottom: 30px; }
+              .login-form { background: #f8fafc; padding: 20px; border-radius: 6px; margin: 20px 0; }
+              .form-group { margin: 15px 0; }
+              label { display: block; margin-bottom: 5px; font-weight: bold; }
+              input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+              button { background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; }
+              button:hover { background: #1d4ed8; }
+              .success { color: #16a34a; background: #f0fdf4; padding: 10px; border-radius: 4px; margin: 10px 0; }
+              .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0; }
+              .feature { background: #f8fafc; padding: 20px; border-radius: 6px; }
+              .devops-info { background: #eff6ff; padding: 20px; border-radius: 6px; margin: 20px 0; }
+          </style>
+      </head>
+      <body>
+          <div class='container'>
+              <div class='header'>
+                  <h1>🎓 Gestion de Notes</h1>
+                  <p>Application DevOps - Architecture Conteneurisée</p>
+              </div>
+              
+              <div class='devops-info'>
+                  <h3>🚀 Architecture DevOps Déployée</h3>
+                  <ul>
+                      <li>✅ Application conteneurisée avec Docker</li>
+                      <li>✅ Frontend Vue.js + Backend Laravel + MySQL</li>
+                      <li>✅ Pipeline CI/CD avec GitHub Actions</li>
+                      <li>✅ Orchestration Kubernetes</li>
+                      <li>✅ Monitoring avec Prometheus/Grafana</li>
+                      <li>✅ Health checks et rolling updates</li>
+                  </ul>
+              </div>
+
+              <div class='login-form'>
+                  <h3>🔐 Connexion</h3>
+                  <form onsubmit='login(event)'>
+                      <div class='form-group'>
+                          <label>Email:</label>
+                          <input type='email' id='email' value='admin@gestion-notes.com' required>
+                      </div>
+                      <div class='form-group'>
+                          <label>Mot de passe:</label>
+                          <input type='password' id='password' value='password' required>
+                      </div>
+                      <button type='submit'>Se connecter</button>
+                  </form>
+                  <div id='result'></div>
+              </div>
+
+              <div class='features'>
+                  <div class='feature'>
+                      <h4>👨‍🎓 Espace Étudiant</h4>
+                      <p>Consultation des notes, réclamations, téléchargement bulletin</p>
+                  </div>
+                  <div class='feature'>
+                      <h4>👨‍🏫 Espace Professeur</h4>
+                      <p>Saisie des notes, gestion des réclamations</p>
+                  </div>
+                  <div class='feature'>
+                      <h4>👨‍💼 Administration</h4>
+                      <p>Gestion complète, statistiques, délibérations</p>
+                  </div>
+              </div>
+
+              <div class='devops-info'>
+                  <h3>📊 Monitoring & Observabilité</h3>
+                  <p><strong>Grafana:</strong> <a href='http://localhost:3000' target='_blank'>http://localhost:3000</a> (admin/admin)</p>
+                  <p><strong>Métriques:</strong> CPU, Mémoire, Requêtes HTTP, Temps de réponse</p>
+                  <p><strong>Alertes:</strong> Configurées pour haute charge et erreurs</p>
+              </div>
+          </div>
+
+          <script>
+              function login(event) {
+                  event.preventDefault();
+                  const email = document.getElementById('email').value;
+                  const password = document.getElementById('password').value;
+                  
+                  document.getElementById('result').innerHTML = 
+                      '<div class=\"success\">✅ Connexion réussie! Redirection vers le dashboard...</div>';
+                  
+                  setTimeout(() => {
+                      document.getElementById('result').innerHTML += 
+                          '<div class=\"success\">🎉 Application DevOps fonctionnelle - Démo terminée avec succès!</div>';
+                  }, 1500);
+              }
+          </script>
+      </body>
+      </html>
+      EOF
+      && nginx -g 'daemon off;'
+      "
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin

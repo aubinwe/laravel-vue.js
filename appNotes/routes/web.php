@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MetricsController;
 
-// SPA Vue en page d'accueil et fallback
-Route::view('/', 'app');
-Route::view('/{any}', 'app')->where('any', '.*');
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/metrics', [MetricsController::class, 'metrics']);

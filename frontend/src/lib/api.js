@@ -23,8 +23,9 @@ api.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401) {
+      console.warn('Token expiré, déconnexion nécessaire')
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      // Ne pas rediriger automatiquement, laisser le router gérer
     }
     return Promise.reject(error)
   }

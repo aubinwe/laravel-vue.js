@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\Student;
 use App\Models\Course;
 use App\Models\Grade;
+use App\Models\Claim;
 use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
@@ -61,7 +62,7 @@ class AdminSeeder extends Seeder
         );
         
         // Créer le profil étudiant
-        Student::firstOrCreate(
+        $student = Student::firstOrCreate(
             ['user_id' => $etudiant->id],
             [
                 'matricule' => 'ETU20240001',
@@ -70,17 +71,48 @@ class AdminSeeder extends Seeder
         );
         
         // Créer des cours
-        $courses = [
-            ['name' => 'Mathématiques', 'code' => 'MATH101', 'coefficient' => 3, 'professor_id' => $prof->id],
-            ['name' => 'Physique', 'code' => 'PHYS101', 'coefficient' => 2, 'professor_id' => $prof->id],
-            ['name' => 'Informatique', 'code' => 'INFO101', 'coefficient' => 4, 'professor_id' => $prof->id],
-        ];
+        $mathCourse = Course::firstOrCreate(
+            ['code' => 'MATH101'],
+            ['name' => 'Mathématiques', 'coefficient' => 3, 'professor_id' => $prof->id]
+        );
         
-        foreach ($courses as $courseData) {
-            Course::firstOrCreate(['code' => $courseData['code']], $courseData);
-        }
+        $physCourse = Course::firstOrCreate(
+            ['code' => 'PHYS101'],
+            ['name' => 'Physique', 'coefficient' => 2, 'professor_id' => $prof->id]
+        );
         
-        echo "Utilisateurs créés avec succès !\n";
+        $infoCourse = Course::firstOrCreate(
+            ['code' => 'INFO101'],
+            ['name' => 'Informatique', 'coefficient' => 4, 'professor_id' => $prof->id]
+        );
+        
+        // Créer des notes
+        Grade::firstOrCreate(
+            ['student_id' => $student->id, 'course_id' => $mathCourse->id],
+            ['note' => 15.5, 'semestre' => 'S1 2024', 'statut' => 'en_cours']
+        );
+        
+        Grade::firstOrCreate(
+            ['student_id' => $student->id, 'course_id' => $physCourse->id],
+            ['note' => 12.0, 'semestre' => 'S1 2024', 'statut' => 'en_cours']
+        );
+        
+        Grade::firstOrCreate(
+            ['student_id' => $student->id, 'course_id' => $infoCourse->id],
+            ['note' => 17.25, 'semestre' => 'S1 2024', 'statut' => 'en_cours']
+        );
+        
+        // Créer des réclamations
+        Claim::firstOrCreate(
+            ['student_id' => $student->id, 'course_id' => $mathCourse->id],
+            [
+                'motif' => 'Erreur de calcul',
+                'description' => 'Je pense qu\'il y a une erreur dans le calcul de ma note',
+                'statut' => 'en_attente'
+            ]
+        );
+        
+        echo "Données créées avec succès !\n";
         echo "Admin: admin@gestion-notes.com / password\n";
         echo "Professeur: prof@test.com / password\n";
         echo "Étudiant: etudiant@test.com / password\n";

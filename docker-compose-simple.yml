@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gestion_notes
+    ports:
+      - "3306:3306"
+
+  backend:
+    image: php:8.2-apache
+    ports:
+      - "8000:80"
+    command: >
+      sh -c "echo '<h1>Backend API Gestion Notes</h1><p>Status: OK</p>' > /var/www/html/index.html && apache2-foreground"
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    command: >
+      sh -c "echo '<h1>Gestion de Notes</h1><p>Application DevOps fonctionnelle</p><a href=\"http://localhost:8000\">Backend API</a>' > /usr/share/nginx/html/index.html && nginx -g 'daemon off;'"

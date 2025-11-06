@@ -156,7 +156,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import api from '@/lib/axios'
+import api from '@/lib/api'
 
 const authStore = useAuthStore()
 
@@ -202,11 +202,15 @@ const fetchUserGrades = async () => {
 
 const createClaim = async () => {
   try {
-    await api.post('/claims', form.value)
+    console.log('Soumission réclamation:', form.value)
+    const response = await api.post('/claims', form.value)
+    console.log('Réclamation créée:', response.data)
     closeModal()
     fetchClaims()
+    alert('Réclamation soumise avec succès!')
   } catch (error) {
     console.error('Erreur lors de la création de la réclamation:', error)
+    alert('Erreur: ' + (error.response?.data?.message || error.message))
   }
 }
 
